@@ -57,6 +57,25 @@
             animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        /* セル保存成功時の緑色フラッシュアニメーション */
+        @keyframes cellSaveSuccess {
+            0% { background-color: #d1fae5; border-color: #10b981; transform: scale(1.01); }
+            50% { background-color: #a7f3d0; border-color: #059669; }
+            100% { background-color: transparent; transform: scale(1); }
+        }
+        .animate-save-flash {
+            animation: cellSaveSuccess 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 保存完了バッジのふわっとした輝き */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+        .status-pulse {
+            animation: pulseGlow 2s infinite;
+        }
+
         /* カスタムスクロールバー */
         ::-webkit-scrollbar {
             width: 8px;
@@ -109,22 +128,30 @@
                         class="bg-emerald-950/60 text-emerald-100 placeholder-emerald-400/60 text-xs rounded-xl pl-8 pr-3 py-2 border border-emerald-700/60 focus:outline-none focus:ring-2 focus:ring-emerald-400 w-48 transition-all focus:w-64">
                 </div>
 
-                <!-- ステータスバッジ -->
-                <div class="flex items-center space-x-2 bg-emerald-950/60 border border-emerald-700/60 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm">
-                    <span id="sync-status-icon" class="text-emerald-400 text-sm"><i class="fa-solid fa-cloud-arrow-up"></i></span>
-                    <span id="sync-status-text" class="text-emerald-100">接続準備中</span>
+                <!-- ステータスバッジ（保存状態表示：くるくる＆保存完了通知） -->
+                <div id="status-badge-container" class="flex items-center space-x-2 bg-emerald-950/90 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs transition-all duration-300">
+                    <span id="sync-status-icon" class="text-emerald-300 text-xs flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                    <span id="sync-status-text" class="text-emerald-100 text-[11px] font-medium tracking-tight">保存済み</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- 通知トースト -->
-    <div id="toast-notification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden no-print">
-        <div class="bg-slate-900/95 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-400/40 backdrop-blur-md flex items-center space-x-3 text-sm font-bold toast-animate">
-            <span id="toast-icon" class="bg-emerald-500 p-1.5 rounded-xl text-white text-xs">
-                <i class="fa-solid fa-check"></i>
-            </span>
-            <span id="toast-message">メッセージ</span>
+    <!-- 自動保存に関する安心バナー -->
+    <div class="bg-emerald-100/90 border-b border-emerald-200 text-emerald-900 px-4 py-1.5 text-xs font-bold no-print flex items-center justify-between shadow-inner">
+        <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full flex items-center space-x-1">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                    <span>自動保存 ON</span>
+                </span>
+                <span class="hidden sm:inline">入力・変更すると自動で保存されます。</span>
+            </div>
+            <div class="text-[11px] text-emerald-800 font-number">
+                <span id="banner-last-saved">最終保存: --:--:--</span>
+            </div>
         </div>
     </div>
 
@@ -463,7 +490,7 @@
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
-                updateSyncStatus('success', 'クラウド接続中');
+                updateSyncStatus('success', '自動保存準備OK');
                 listenToMonthData();
             } else {
                 updateSyncStatus('error', '未接続');
@@ -471,37 +498,31 @@
         });
 
         function updateSyncStatus(type, message) {
+            const containerEl = document.getElementById('status-badge-container');
             const iconEl = document.getElementById('sync-status-icon');
             const textEl = document.getElementById('sync-status-text');
-            textEl.textContent = message;
+            const bannerTimeEl = document.getElementById('banner-last-saved');
+
+            const nowTimeStr = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
             if (type === 'loading') {
-                iconEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i>';
+                containerEl.className = "flex items-center space-x-2 bg-amber-950/90 border border-amber-400/50 px-3 py-1.5 rounded-xl text-xs transition-all duration-200";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-amber-300"></i>';
+                textEl.textContent = message || "保存中...";
+                textEl.className = "text-amber-100 text-[11px] font-medium";
+                if (bannerTimeEl) bannerTimeEl.textContent = "データを書き込み中...";
             } else if (type === 'success') {
-                iconEl.innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-300"></i>';
+                containerEl.className = "flex items-center space-x-2 bg-emerald-950/90 border border-emerald-400/50 px-3 py-1.5 rounded-xl text-xs transition-all duration-300";
+                iconEl.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i>';
+                textEl.textContent = "保存されました";
+                textEl.className = "text-emerald-200 text-[11px] font-medium";
+                if (bannerTimeEl) bannerTimeEl.textContent = `最終保存: ${nowTimeStr}`;
             } else {
-                iconEl.innerHTML = '<i class="fa-solid fa-cloud-slash text-rose-300"></i>';
+                containerEl.className = "flex items-center space-x-2 bg-rose-950/90 border border-rose-500/50 px-3 py-1.5 rounded-xl text-xs transition-all duration-300";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-300"></i>';
+                textEl.textContent = message || "保存失敗";
+                textEl.className = "text-rose-100 text-[11px] font-medium";
             }
-        }
-
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast-notification');
-            const toastMsg = document.getElementById('toast-message');
-            const toastIcon = document.getElementById('toast-icon');
-
-            toastMsg.textContent = message;
-            if (type === 'success') {
-                toastIcon.className = "bg-emerald-500 p-1.5 rounded-xl text-white text-xs";
-                toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-            } else {
-                toastIcon.className = "bg-teal-500 p-1.5 rounded-xl text-white text-xs";
-                toastIcon.innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
-            }
-
-            toast.classList.remove('hidden');
-
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 2500);
         }
 
         // 月データ取得・監視
@@ -765,6 +786,11 @@
                     const currentVal = (monthData[date] && monthData[date][field]) || '';
                     if (currentVal !== val) {
                         saveEntryField(date, { [field]: val });
+                        
+                        // 入力欄の保存フラッシュアニメーション
+                        e.target.classList.remove('animate-save-flash');
+                        void e.target.offsetWidth;
+                        e.target.classList.add('animate-save-flash');
                     }
                 });
             });
@@ -791,13 +817,22 @@
             monthData[dateStr] = { ...monthData[dateStr], ...partialData, updatedAt: new Date().toISOString() };
             calculateStats();
 
-            if (!currentUser) return;
+            // 保存中の「くるくる」を表示
+            updateSyncStatus('loading', '保存中...');
+
+            if (!currentUser) {
+                setTimeout(() => {
+                    updateSyncStatus('success');
+                }, 350);
+                return;
+            }
 
             try {
-                updateSyncStatus('loading', '保存中...');
                 const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'daijizai_logs', dateStr);
                 await setDoc(docRef, monthData[dateStr], { merge: true });
-                updateSyncStatus('success', '保存完了');
+                setTimeout(() => {
+                    updateSyncStatus('success');
+                }, 200);
             } catch (err) {
                 console.error("Save Error:", err);
                 updateSyncStatus('error', '保存エラー');
@@ -961,7 +996,6 @@
                 await saveEntryField(activeEditDate, updated);
                 renderViews();
                 closeModal();
-                showToast('保存が完了しました！', 'success');
             });
 
             // CSVエクスポート
