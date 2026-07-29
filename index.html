@@ -1462,7 +1462,7 @@
 4. 「文字起こし結果」などの挨拶や解説は出力せず、純粋な本文テキストのみを出力してください。
 *5. 絶対に本文を編集したり、追加したりしないでください。　読み取った純粋な本文のみ出力してください。*`;
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
 
             const payload = {
                 contents: [
