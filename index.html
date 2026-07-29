@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静岡新聞『大自在』学習・感想ノート</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Noto Sans JP & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f4fbf7;
+        }
+
+        .font-number {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+        }
+
+        /* スプレッドシートのスクロールと固定ヘッダー */
+        .spreadsheet-container {
+            max-height: calc(100vh - 360px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+        
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #064e3b;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* アニメーション定義 */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.98) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .animate-view-change {
+            animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes toastSlide {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .spreadsheet-container { max-height: none; min-height: 0; overflow: visible; }
+            body { background: #fff; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- トップナビゲーション -->
+    <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white shadow-lg no-print border-b-4 border-emerald-500">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-emerald-500/20 border border-emerald-400/30 p-2.5 rounded-2xl backdrop-blur-md shadow-inner flex items-center justify-center">
+                    <i class="fa-solid fa-newspaper text-2xl text-emerald-300"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-xl md:text-2xl font-black tracking-tight">静岡新聞『大自在』学習ノート</h1>
+                        <span class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">v2.0 UI Pro</span>
+                    </div>
+                    <p class="text-xs text-emerald-200/90 font-medium hidden sm:block">毎日読んで題名と感想を記録・自動同期保存</p>
+                </div>
+            </div>
+
+            <!-- 右側ツール & クラウド同期ステータス -->
+            <div class="flex items-center space-x-3">
+                <!-- 検索バー -->
+                <div class="relative hidden lg:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300/70 text-xs"></i>
+                    <input type="text" id="global-search" placeholder="感想や題名を検索..." 
+                        class="bg-emerald-950/60 text-emerald-100 placeholder-emerald-400/60 text-xs rounded-xl pl-8 pr-3 py-2 border border-emerald-700/60 focus:outline-none focus:ring-2 focus:ring-emerald-400 w-48 transition-all focus:w-64">
+                </div>
+
+                <!-- ステータスバッジ -->
+                <div class="flex items-center space-x-2 bg-emerald-950/60 border border-emerald-700/60 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm">
+                    <span id="sync-status-icon" class="text-emerald-400 text-sm"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                    <span id="sync-status-text" class="text-emerald-100">接続準備中</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 通知トースト -->
+    <div id="toast-notification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden no-print">
+        <div class="bg-slate-900/95 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-400/40 backdrop-blur-md flex items-center space-x-3 text-sm font-bold toast-animate">
+            <span id="toast-icon" class="bg-emerald-500 p-1.5 rounded-xl text-white text-xs">
+                <i class="fa-solid fa-check"></i>
+            </span>
+            <span id="toast-message">メッセージ</span>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-5">
+
+        <!-- ダッシュボード (実績サマリー) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 no-print">
+            <!-- 読了数カード -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-emerald-300 transition">
+                <div class="p-3 bg-emerald-100/70 text-emerald-700 rounded-xl">
+                    <i class="fa-solid fa-book-open text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-500">今月の読了数</div>
+                    <div class="text-lg font-black text-slate-800 font-number">
+                        <span id="stat-completed" class="text-emerald-600 text-xl">0</span>
+                        <span class="text-xs text-slate-400 font-normal">/ <span id="stat-total">0</span> 日</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 達成率カード -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-emerald-300 transition">
+                <div class="p-3 bg-teal-100/70 text-teal-700 rounded-xl">
+                    <i class="fa-solid fa-chart-pie text-xl"></i>
+                </div>
+                <div class="flex-grow">
+                    <div class="text-[11px] font-bold text-slate-500">達成率</div>
+                    <div class="flex items-center justify-between">
+                        <span id="stat-percentage" class="text-lg font-black text-teal-700 font-number">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                        <div id="stat-progress-bar" class="bg-teal-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 連続読了日数カード -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-amber-300 transition">
+                <div class="p-3 bg-amber-100/70 text-amber-600 rounded-xl">
+                    <i class="fa-solid fa-fire text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-500">現在の継続日数</div>
+                    <div class="text-lg font-black text-slate-800 font-number">
+                        <span id="stat-streak" class="text-amber-600 text-xl">0</span>
+                        <span class="text-xs text-slate-400 font-normal">日連続 🔥</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 総文字数カード -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-indigo-300 transition">
+                <div class="p-3 bg-indigo-100/70 text-indigo-700 rounded-xl">
+                    <i class="fa-solid fa-pen-nib text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-500">今月の総記述量</div>
+                    <div class="text-lg font-black text-slate-800 font-number">
+                        <span id="stat-char-count" class="text-indigo-600 text-xl">0</span>
+                        <span class="text-xs text-slate-400 font-normal">文字</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- コントロールバー（年月選択 & 表示切替 & アクション） -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print">
+            
+            <!-- 年月セレクター -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <div class="flex items-center space-x-2 bg-emerald-50/80 p-1.5 rounded-xl border border-emerald-200">
+                    <i class="fa-solid fa-calendar-days text-emerald-700 text-base pl-2"></i>
+                    <select id="select-year" class="bg-white font-black text-base text-emerald-950 px-2 py-1 rounded-lg border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                        <!-- 動的生成 -->
+                    </select>
+                    <span class="text-emerald-900 font-bold text-xs">年</span>
+
+                    <select id="select-month" class="bg-white font-black text-base text-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                        <!-- 動的生成 -->
+                    </select>
+                    <span class="text-emerald-900 font-bold text-xs">月</span>
+                </div>
+
+                <button id="btn-today" class="bg-emerald-100/70 hover:bg-emerald-200/80 text-emerald-900 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>今月に移動</span>
+                </button>
+            </div>
+
+            <!-- 表示モード切り替えタブ (スプレッドシート / カレンダー) -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button id="btn-view-table" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-emerald-900 shadow-sm">
+                    <i class="fa-solid fa-table-cells"></i>
+                    <span>スプレッドシート</span>
+                </button>
+                <button id="btn-view-calendar" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    <span>カレンダー</span>
+                </button>
+            </div>
+
+            <!-- フィルタ & 出力アクション -->
+            <div class="flex items-center space-x-2">
+                <!-- 絞り込みフィルター -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                    <button data-filter="all" class="btn-filter px-2.5 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-sm">すべて</button>
+                    <button data-filter="completed" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">読了のみ</button>
+                    <button data-filter="incomplete" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">未記述</button>
+                </div>
+
+                <!-- 印刷ボタン -->
+                <button id="btn-print" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center space-x-1 transition" title="印刷用画面表示">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">印刷</span>
+                </button>
+
+                <!-- CSV出力ボタン -->
+                <button id="btn-export-csv" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition flex items-center space-x-1">
+                    <i class="fa-solid fa-file-csv"></i>
+                    <span class="hidden sm:inline">CSV保存</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 現在選択中表示 ＆ 検索フィルター警告バー -->
+        <div class="bg-emerald-900 text-white px-5 py-2.5 rounded-2xl shadow-sm flex flex-wrap items-center justify-between no-print gap-2">
+            <div class="flex items-center space-x-3">
+                <span id="current-month-badge" class="bg-emerald-400 text-emerald-950 font-black text-lg px-3.5 py-0.5 rounded-xl font-number">
+                    ----年 --月
+                </span>
+                <span id="view-mode-title" class="text-xs font-semibold text-emerald-100">の学習ログを表示中</span>
+            </div>
+            <div id="search-active-indicator" class="hidden text-xs bg-amber-400 text-amber-950 font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1">
+                <i class="fa-solid fa-filter"></i>
+                <span>検索結果を表示中 (<button id="btn-clear-search" class="underline hover:text-rose-900">解除</button>)</span>
+            </div>
+        </div>
+
+        <!-- メインビュー領域 (スプレッドシート & カレンダー) -->
+        <div id="view-container" class="animate-view-change">
+            
+            <!-- 1. スプレッドシート表示 -->
+            <div id="spreadsheet-wrapper" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="spreadsheet-container">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <thead>
+                            <tr class="sticky-header text-xs font-bold border-b border-emerald-900">
+                                <th class="py-3 px-3 w-16 text-center">日付</th>
+                                <th class="py-3 px-3 w-14 text-center">読了</th>
+                                <th class="py-3 px-4 w-1/4">自分で考えた題名 (見出し)</th>
+                                <th class="py-3 px-4 w-2/5">感想・学び・要約</th>
+                                <th class="py-3 px-3 w-36 hidden md:table-cell">キーワード</th>
+                                <th class="py-3 px-3 w-20 text-center no-print">詳細</th>
+                            </tr>
+                        </thead>
+                        <tbody id="spreadsheet-body" class="divide-y divide-slate-100 bg-white">
+                            <!-- JSで生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. カレンダー表示 (初期状態は非表示) -->
+            <div id="calendar-wrapper" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-black text-slate-500 pb-3 border-b border-slate-200">
+                    <div class="text-rose-600">日</div>
+                    <div>月</div>
+                    <div>火</div>
+                    <div>水</div>
+                    <div>木</div>
+                    <div>金</div>
+                    <div class="text-blue-600">土</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2 pt-3">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 印刷用ヘッダー（印刷時のみ表示） -->
+        <div class="hidden print-only mb-6">
+            <h1 class="text-2xl font-bold text-center border-b-2 border-black pb-2 mb-2">
+                静岡新聞『大自在』学習・感想提出シート
+            </h1>
+            <div class="flex justify-between text-sm">
+                <span>対象年月: <strong id="print-year-month">----年 --月</strong></span>
+                <span>氏名: ___________________________</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 詳細編集モーダル -->
+    <div id="modal-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] animate-view-change">
+            
+            <!-- モーダルヘッダー -->
+            <div class="flex justify-between items-center pb-3.5 border-b border-slate-200">
+                <div class="flex items-center space-x-3">
+                    <span id="modal-date-badge" class="bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-sm font-number"></span>
+                    <h2 class="text-lg font-bold text-slate-800">大自在 学習ノート入力</h2>
+                </div>
+                <button id="btn-modal-close" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- モーダルコンテンツ -->
+            <div class="py-4 space-y-4 overflow-y-auto flex-grow pr-1">
+                <!-- 読了トグル -->
+                <label class="flex items-center space-x-3 cursor-pointer bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 hover:bg-emerald-100/60 transition">
+                    <input type="checkbox" id="modal-status" class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                    <span class="font-bold text-emerald-950 text-sm">この記事を読んだ（読了完了）</span>
+                </label>
+
+                <!-- 元記事キーワード -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">元の記事テーマ / キーワード（メモ）</label>
+                    <input type="text" id="modal-original-title" placeholder="例: 熱中症対策、富士山環境保全、AI技術 など"
+                        class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                </div>
+
+                <!-- 自分で考えた題名 -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">自分で考えた題名 <span class="text-rose-500 font-bold">* 必須</span></label>
+                    <input type="text" id="modal-custom-title" placeholder="記事をひとことで表すオリジナル見出しを入力"
+                        class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                </div>
+
+                <!-- 感想・要約 ＆ テンプレート挿入ボタン -->
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-bold text-slate-600">感想・意見・学び・要約 <span class="text-rose-500 font-bold">* 必須</span></label>
+                        <span id="modal-char-count" class="text-xs font-bold text-slate-400 font-number">0 文字</span>
+                    </div>
+
+                    <!-- 書き方アシストテンプレートボタン -->
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 py-1">💡 ヒント:</span>
+                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+                            data-template="この記事を読んで、筆者が伝えたいことは〜〜だと感じた。自分なら〜〜したい。">
+                            要約と意見
+                        </button>
+                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+                            data-template="〜〜という言葉が心に残った。なぜなら〜〜だからだ。">
+                            印象的な言葉
+                        </button>
+                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+                            data-template="今回のテーマについて、これまで〜〜と思っていたが、読んだ後は〜〜と考改めた。">
+                            考えの変化
+                        </button>
+                    </div>
+
+                    <textarea id="modal-content" rows="5" placeholder="大自在を読んで感じたことや、自分の言葉で要約した内容を入力しましょう。"
+                        class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none leading-relaxed transition"></textarea>
+                </div>
+            </div>
+
+            <!-- モーダルアクション -->
+            <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2.5">
+                <button id="btn-modal-cancel" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                    キャンセル
+                </button>
+                <button id="btn-modal-save" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>保存する</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK v11 & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            collection, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // アプリケーションIDとFirebase構成
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'daijizai-diary-app';
+        let firebaseConfig;
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "dummy-key",
+                authDomain: "dummy.firebaseapp.com",
+                projectId: "dummy-project"
+            };
+        } catch (e) {
+            console.warn("Firebase config fallback", e);
+            firebaseConfig = { projectId: "demo-project" };
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // アプリ状態
+        let currentUser = null;
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth() + 1;
+        let monthData = {}; 
+        let unsubscribeStore = null;
+        let activeEditDate = null;
+        let currentViewMode = 'table'; // 'table' | 'calendar'
+        let currentFilter = 'all'; // 'all' | 'completed' | 'incomplete'
+        let searchQuery = '';
+
+        // 認証処理
+        async function initAuth() {
+            try {
+                updateSyncStatus('loading', 'クラウド同期中...');
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                updateSyncStatus('error', 'ローカル保存モード');
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                updateSyncStatus('success', 'クラウド接続中');
+                listenToMonthData();
+            } else {
+                updateSyncStatus('error', '未接続');
+            }
+        });
+
+        function updateSyncStatus(type, message) {
+            const iconEl = document.getElementById('sync-status-icon');
+            const textEl = document.getElementById('sync-status-text');
+            textEl.textContent = message;
+            if (type === 'loading') {
+                iconEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i>';
+            } else if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-300"></i>';
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-cloud-slash text-rose-300"></i>';
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = message;
+            if (type === 'success') {
+                toastIcon.className = "bg-emerald-500 p-1.5 rounded-xl text-white text-xs";
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                toastIcon.className = "bg-teal-500 p-1.5 rounded-xl text-white text-xs";
+                toastIcon.innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
+            }
+
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        // 月データ取得・監視
+        function listenToMonthData(isMonthChanged = false) {
+            if (unsubscribeStore) unsubscribeStore();
+
+            if (!currentUser) {
+                renderViews(isMonthChanged);
+                return;
+            }
+
+            const logsCollectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'daijizai_logs');
+            updateSyncStatus('loading', '読み込み中...');
+
+            unsubscribeStore = onSnapshot(logsCollectionRef, (snapshot) => {
+                monthData = {};
+                const yearMonthPrefix = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.date && data.date.startsWith(yearMonthPrefix)) {
+                        monthData[data.date] = data;
+                    }
+                });
+
+                renderViews(isMonthChanged);
+                updateSyncStatus('success', '保存完了');
+            }, (error) => {
+                console.error("Firestore Listen Error:", error);
+                updateSyncStatus('error', '同期エラー');
+                renderViews(isMonthChanged);
+            });
+        }
+
+        function getDaysInMonth(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        function renderViews(animate = false) {
+            document.getElementById('current-month-badge').textContent = `${currentYear}年 ${currentMonth}月`;
+            document.getElementById('print-year-month').textContent = `${currentYear}年 ${currentMonth}月`;
+
+            if (currentViewMode === 'table') {
+                document.getElementById('spreadsheet-wrapper').classList.remove('hidden');
+                document.getElementById('calendar-wrapper').classList.add('hidden');
+                renderSpreadsheet();
+            } else {
+                document.getElementById('spreadsheet-wrapper').classList.add('hidden');
+                document.getElementById('calendar-wrapper').classList.remove('hidden');
+                renderCalendar();
+            }
+
+            if (animate) {
+                const container = document.getElementById('view-container');
+                container.classList.remove('animate-view-change');
+                void container.offsetWidth;
+                container.classList.add('animate-view-change');
+            }
+
+            calculateStats();
+        }
+
+        // スプレッドシート描画
+        function renderSpreadsheet() {
+            const tbody = document.getElementById('spreadsheet-body');
+            tbody.innerHTML = '';
+
+            const totalDays = getDaysInMonth(currentYear, currentMonth);
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateObj = new Date(currentYear, currentMonth - 1, day);
+                const dayOfWeek = dateObj.getDay();
+                const dayName = dayNames[dayOfWeek];
+                const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                const item = monthData[dateStr] || {
+                    date: dateStr,
+                    status: false,
+                    customTitle: '',
+                    content: '',
+                    originalTitle: ''
+                };
+
+                // フィルターチェック
+                if (currentFilter === 'completed' && !item.status) continue;
+                if (currentFilter === 'incomplete' && item.status) continue;
+
+                // 検索クエリチェック
+                if (searchQuery.trim() !== '') {
+                    const q = searchQuery.toLowerCase();
+                    const match = (item.customTitle || '').toLowerCase().includes(q) ||
+                                  (item.content || '').toLowerCase().includes(q) ||
+                                  (item.originalTitle || '').toLowerCase().includes(q);
+                    if (!match) continue;
+                }
+
+                const isToday = dateStr === todayStr;
+
+                let dayBgClass = 'bg-slate-50/60';
+                let dayTextColor = 'text-slate-800';
+                if (dayOfWeek === 0) {
+                    dayBgClass = 'bg-rose-50/70';
+                    dayTextColor = 'text-rose-600 font-bold';
+                } else if (dayOfWeek === 6) {
+                    dayBgClass = 'bg-blue-50/70';
+                    dayTextColor = 'text-blue-600 font-bold';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-emerald-50/60 transition border-b border-slate-100 ${isToday ? 'bg-amber-50/80 border-l-4 border-l-amber-500' : ''}`;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-center font-bold ${dayTextColor} ${dayBgClass}">
+                        <div class="text-sm font-number">${day}日</div>
+                        <div class="text-[10px] opacity-80">(${dayName})</div>
+                        ${isToday ? '<span class="inline-block bg-amber-500 text-white text-[9px] font-black px-1.5 rounded mt-0.5">TODAY</span>' : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                        <input type="checkbox" data-date="${dateStr}" class="chk-status w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer" ${item.status ? 'checked' : ''}>
+                    </td>
+                    <td class="py-2 px-3">
+                        <input type="text" data-date="${dateStr}" data-field="customTitle" value="${escapeHtml(item.customTitle || '')}" 
+                            placeholder="自分で考えた題名を入力..."
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs font-bold text-slate-800 transition">
+                    </td>
+                    <td class="py-2 px-3">
+                        <input type="text" data-date="${dateStr}" data-field="content" value="${escapeHtml(item.content || '')}" 
+                            placeholder="感想や学んだ要約を入力..."
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs transition">
+                    </td>
+                    <td class="py-2 px-3 hidden md:table-cell">
+                        <input type="text" data-date="${dateStr}" data-field="originalTitle" value="${escapeHtml(item.originalTitle || '')}" 
+                            placeholder="キーワード..."
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white text-xs text-slate-500 transition">
+                    </td>
+                    <td class="py-2 px-3 text-center no-print">
+                        <button data-date="${dateStr}" class="btn-open-modal text-emerald-700 hover:text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center justify-center space-x-1 mx-auto" title="詳しく編集">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span class="hidden sm:inline">編集</span>
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            }
+
+            attachRowEvents();
+        }
+
+        // カレンダー描画
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const firstDayIndex = new Date(currentYear, currentMonth - 1, 1).getDay();
+            const totalDays = getDaysInMonth(currentYear, currentMonth);
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // 空白セル
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "bg-slate-50/50 rounded-2xl min-h-[90px] border border-dashed border-slate-100";
+                grid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const item = monthData[dateStr] || { status: false, customTitle: '', content: '' };
+                const isToday = dateStr === todayStr;
+
+                const cell = document.createElement('div');
+                cell.className = `p-2 rounded-2xl min-h-[100px] border transition relative flex flex-col justify-between cursor-pointer group ${
+                    item.status ? 'bg-emerald-50/80 border-emerald-300 hover:bg-emerald-100/60' : 'bg-white border-slate-200 hover:border-emerald-400'
+                } ${isToday ? 'ring-2 ring-amber-400' : ''}`;
+
+                cell.addEventListener('click', () => openDetailModal(dateStr));
+
+                cell.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-xs font-number ${isToday ? 'text-amber-600' : 'text-slate-700'}">${day}</span>
+                        ${item.status ? '<span class="text-emerald-600 text-xs"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                    </div>
+                    <div class="my-1 flex-grow">
+                        ${item.customTitle ? `<p class="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight">${escapeHtml(item.customTitle)}</p>` : `<span class="text-[10px] text-slate-300 italic">未入力</span>`}
+                    </div>
+                    <div class="text-[9px] text-slate-400 text-right">
+                        ${item.content ? '<i class="fa-solid fa-align-left text-emerald-600"></i>' : ''}
+                    </div>
+                `;
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function calculateStats() {
+            const totalDays = getDaysInMonth(currentYear, currentMonth);
+            let completedCount = 0;
+            let totalChars = 0;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const item = monthData[dateStr];
+                if (item) {
+                    if (item.status) completedCount++;
+                    if (item.content) totalChars += item.content.length;
+                    if (item.customTitle) totalChars += item.customTitle.length;
+                }
+            }
+
+            document.getElementById('stat-completed').textContent = completedCount;
+            document.getElementById('stat-total').textContent = totalDays;
+            
+            const percentage = totalDays > 0 ? Math.round((completedCount / totalDays) * 100) : 0;
+            document.getElementById('stat-percentage').textContent = `${percentage}%`;
+            document.getElementById('stat-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('stat-char-count').textContent = totalChars.toLocaleString();
+
+            // 連続日数の算出
+            let streak = 0;
+            const now = new Date();
+            let checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            while (true) {
+                const year = checkDate.getFullYear();
+                const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+                const day = String(checkDate.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                if (monthData[dateStr] && monthData[dateStr].status) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            document.getElementById('stat-streak').textContent = streak;
+
+            // 100%達成紙吹雪
+            if (percentage === 100 && totalDays > 0) {
+                try {
+                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                } catch(e) {}
+            }
+        }
+
+        function attachRowEvents() {
+            document.querySelectorAll('.chk-status').forEach(chk => {
+                chk.addEventListener('change', (e) => {
+                    const date = e.target.getAttribute('data-date');
+                    saveEntryField(date, { status: e.target.checked });
+                });
+            });
+
+            document.querySelectorAll('.input-cell').forEach(input => {
+                input.addEventListener('blur', (e) => {
+                    const date = e.target.getAttribute('data-date');
+                    const field = e.target.getAttribute('data-field');
+                    const val = e.target.value;
+                    const currentVal = (monthData[date] && monthData[date][field]) || '';
+                    if (currentVal !== val) {
+                        saveEntryField(date, { [field]: val });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-open-modal').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const date = e.currentTarget.getAttribute('data-date');
+                    openDetailModal(date);
+                });
+            });
+        }
+
+        async function saveEntryField(dateStr, partialData) {
+            if (!monthData[dateStr]) {
+                monthData[dateStr] = {
+                    date: dateStr,
+                    status: false,
+                    customTitle: '',
+                    content: '',
+                    originalTitle: ''
+                };
+            }
+
+            monthData[dateStr] = { ...monthData[dateStr], ...partialData, updatedAt: new Date().toISOString() };
+            calculateStats();
+
+            if (!currentUser) return;
+
+            try {
+                updateSyncStatus('loading', '保存中...');
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'daijizai_logs', dateStr);
+                await setDoc(docRef, monthData[dateStr], { merge: true });
+                updateSyncStatus('success', '保存完了');
+            } catch (err) {
+                console.error("Save Error:", err);
+                updateSyncStatus('error', '保存エラー');
+            }
+        }
+
+        function openDetailModal(dateStr) {
+            activeEditDate = dateStr;
+            const item = monthData[dateStr] || {
+                date: dateStr,
+                status: false,
+                customTitle: '',
+                content: '',
+                originalTitle: ''
+            };
+
+            const [y, m, d] = dateStr.split('-');
+            document.getElementById('modal-date-badge').textContent = `${y}年${parseInt(m, 10)}月${parseInt(d, 10)}日`;
+            document.getElementById('modal-status').checked = !!item.status;
+            document.getElementById('modal-original-title').value = item.originalTitle || '';
+            document.getElementById('modal-custom-title').value = item.customTitle || '';
+            document.getElementById('modal-content').value = item.content || '';
+
+            updateModalCharCount();
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-detail').classList.add('hidden');
+            activeEditDate = null;
+        }
+
+        function updateModalCharCount() {
+            const val = document.getElementById('modal-content').value || '';
+            document.getElementById('modal-char-count').textContent = `${val.length} 文字`;
+        }
+
+        // テンプレート挿入ボタン機能
+        document.querySelectorAll('.btn-template').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tmpl = e.currentTarget.getAttribute('data-template');
+                const contentTextarea = document.getElementById('modal-content');
+                if (contentTextarea.value.trim() !== '') {
+                    contentTextarea.value += '\n' + tmpl;
+                } else {
+                    contentTextarea.value = tmpl;
+                }
+                updateModalCharCount();
+            });
+        });
+
+        // イベントリスナー設定
+        function initEvents() {
+            // セレクター
+            const yearSelect = document.getElementById('select-year');
+            const monthSelect = document.getElementById('select-month');
+
+            const thisYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
+            for (let y = thisYear - 2; y <= thisYear + 2; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+
+            monthSelect.innerHTML = '';
+            for (let m = 1; m <= 12; m++) {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                if (m === currentMonth) opt.selected = true;
+                monthSelect.appendChild(opt);
+            }
+
+            yearSelect.addEventListener('change', (e) => {
+                currentYear = parseInt(e.target.value, 10);
+                showToast(`${currentYear}年 ${currentMonth}月に変更しました`);
+                listenToMonthData(true);
+            });
+
+            monthSelect.addEventListener('change', (e) => {
+                currentMonth = parseInt(e.target.value, 10);
+                showToast(`${currentYear}年 ${currentMonth}月に変更しました`);
+                listenToMonthData(true);
+            });
+
+            document.getElementById('btn-today').addEventListener('click', () => {
+                const now = new Date();
+                currentYear = now.getFullYear();
+                currentMonth = now.getMonth() + 1;
+                yearSelect.value = currentYear;
+                monthSelect.value = currentMonth;
+                showToast(`今月 (${currentYear}年 ${currentMonth}月) に移動しました`);
+                listenToMonthData(true);
+            });
+
+            // ビュー切替
+            document.getElementById('btn-view-table').addEventListener('click', () => {
+                currentViewMode = 'table';
+                document.getElementById('btn-view-table').className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-emerald-900 shadow-sm";
+                document.getElementById('btn-view-calendar').className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900";
+                renderViews(true);
+            });
+
+            document.getElementById('btn-view-calendar').addEventListener('click', () => {
+                currentViewMode = 'calendar';
+                document.getElementById('btn-view-calendar').className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-emerald-900 shadow-sm";
+                document.getElementById('btn-view-table').className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900";
+                renderViews(true);
+            });
+
+            // フィルターボタン
+            document.querySelectorAll('.btn-filter').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.btn-filter').forEach(b => {
+                        b.className = "btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800";
+                    });
+                    e.currentTarget.className = "btn-filter px-2.5 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-sm";
+                    currentFilter = e.currentTarget.getAttribute('data-filter');
+                    renderViews(true);
+                });
+            });
+
+            // 検索機能
+            const searchInput = document.getElementById('global-search');
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                const activeIndicator = document.getElementById('search-active-indicator');
+                if (searchQuery.trim() !== '') {
+                    activeIndicator.classList.remove('hidden');
+                } else {
+                    activeIndicator.classList.add('hidden');
+                }
+                renderViews();
+            });
+
+            document.getElementById('btn-clear-search')?.addEventListener('click', () => {
+                searchInput.value = '';
+                searchQuery = '';
+                document.getElementById('search-active-indicator').classList.add('hidden');
+                renderViews();
+            });
+
+            // モーダル
+            document.getElementById('modal-content').addEventListener('input', updateModalCharCount);
+            document.getElementById('btn-modal-close').addEventListener('click', closeModal);
+            document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+
+            document.getElementById('btn-modal-save').addEventListener('click', async () => {
+                if (!activeEditDate) return;
+
+                const updated = {
+                    status: document.getElementById('modal-status').checked,
+                    originalTitle: document.getElementById('modal-original-title').value.trim(),
+                    customTitle: document.getElementById('modal-custom-title').value.trim(),
+                    content: document.getElementById('modal-content').value.trim()
+                };
+
+                await saveEntryField(activeEditDate, updated);
+                renderViews();
+                closeModal();
+                showToast('保存が完了しました！', 'success');
+            });
+
+            // CSVエクスポート
+            document.getElementById('btn-export-csv').addEventListener('click', () => {
+                const totalDays = getDaysInMonth(currentYear, currentMonth);
+                let csvContent = "\uFEFF";
+                csvContent += "日付,読了状態,自分で考えた題名,感想・要約,元記事キーワード\n";
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const item = monthData[dateStr] || {};
+
+                    const status = item.status ? "読了" : "未読";
+                    const customTitle = `"${(item.customTitle || '').replace(/"/g, '""')}"`;
+                    const content = `"${(item.content || '').replace(/"/g, '""')}"`;
+                    const originalTitle = `"${(item.originalTitle || '').replace(/"/g, '""')}"`;
+
+                    csvContent += `${dateStr},${status},${customTitle},${content},${originalTitle}\n`;
+                }
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `大自在感想ノート_${currentYear}年${currentMonth}月.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // 印刷
+            document.getElementById('btn-print').addEventListener('click', () => {
+                window.print();
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initEvents();
+            renderViews();
+            initAuth();
+        });
+    </script>
+</body>
+</html>
