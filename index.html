@@ -1,445 +1,673 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>静岡新聞『大自在』学習・感想ノート</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Noto Sans JP & Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <style>
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f4fbf7;
-        }
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>静岡新聞『大自在』学習・感想ノート</title>
+	<!-- Tailwind CSS CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- FontAwesome CDN -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<!-- Google Fonts Noto Sans JP & Plus Jakarta Sans -->
+	<link
+		href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
+		rel="stylesheet">
+	<!-- Canvas Confetti CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-        .font-number {
-            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-        }
+	<style>
+		body {
+			font-family: 'Noto Sans JP', sans-serif;
+			background-color: #f4fbf7;
+		}
 
-        /* スプレッドシートのスクロールと固定ヘッダー */
-        .spreadsheet-container {
-            max-height: calc(100vh - 360px);
-            min-height: 420px;
-            overflow-y: auto;
-        }
-        
-        .sticky-header th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #064e3b;
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+		.font-number {
+			font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+		}
 
-        /* アニメーション定義 */
-        @keyframes fadeInScale {
-            0% { opacity: 0; transform: scale(0.98) translateY(8px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
+		/* スプレッドシートのスクロールと固定ヘッダー */
+		.spreadsheet-container {
+			max-height: calc(100vh - 360px);
+			min-height: 420px;
+			overflow-y: auto;
+		}
 
-        .animate-view-change {
-            animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+		.sticky-header th {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			background-color: #064e3b;
+			color: #ffffff;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
 
-        /* セル保存成功時の緑色フラッシュアニメーション */
-        @keyframes cellSaveSuccess {
-            0% { background-color: #d1fae5; border-color: #10b981; transform: scale(1.01); }
-            50% { background-color: #a7f3d0; border-color: #059669; }
-            100% { background-color: transparent; transform: scale(1); }
-        }
-        .animate-save-flash {
-            animation: cellSaveSuccess 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+		/* アニメーション定義 */
+		@keyframes fadeInScale {
+			0% {
+				opacity: 0;
+				transform: scale(0.98) translateY(8px);
+			}
 
-        /* カスタムスクロールバー */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+			100% {
+				opacity: 1;
+				transform: scale(1) translateY(0);
+			}
+		}
 
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .spreadsheet-container { max-height: none; min-height: 0; overflow: visible; }
-            body { background: #fff; }
-        }
-    </style>
+		.animate-view-change {
+			animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		}
+
+		/* セル保存成功時の緑色フラッシュアニメーション */
+		@keyframes cellSaveSuccess {
+			0% {
+				background-color: #d1fae5;
+				border-color: #10b981;
+				transform: scale(1.01);
+			}
+
+			50% {
+				background-color: #a7f3d0;
+				border-color: #059669;
+			}
+
+			100% {
+				background-color: transparent;
+				transform: scale(1);
+			}
+		}
+
+		.animate-save-flash {
+			animation: cellSaveSuccess 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+
+		/* カスタムスクロールバー */
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: #f1f5f9;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: #cbd5e1;
+			border-radius: 9999px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: #94a3b8;
+		}
+
+		/* 🖥️ 画面表示時は印刷用テキストを確実に隠す */
+		@media screen {
+
+			.print-text-target,
+			.print-content-box,
+			.print-transcription-box,
+			.print-title-target,
+			.print-keyword-target {
+				display: none !important;
+			}
+		}
+
+		/* 🖨️ 印刷用スタイルの完全最適化 */
+		@media print {
+
+			.no-print,
+			header,
+			.bg-emerald-100\/90,
+			.grid-cols-2,
+			.bg-white.p-4,
+			.bg-emerald-900,
+			input[type="checkbox"],
+			.chk-status,
+			.btn-open-modal,
+			.btn-quick-camera {
+				display: none !important;
+			}
+
+			.print-only {
+				display: block !important;
+			}
+
+			.print-hidden {
+				display: none !important;
+			}
+
+			body {
+				background: #ffffff !important;
+				color: #000000 !important;
+				font-size: 10pt;
+				margin: 0;
+				padding: 0;
+			}
+
+			main {
+				max-width: 100% !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+
+			.spreadsheet-container {
+				max-height: none !important;
+				min-height: 0 !important;
+				overflow: visible !important;
+			}
+
+			/* 画面用インプット欄を印刷時非表示に */
+			.input-cell {
+				display: none !important;
+			}
+
+			/* 印刷用テキストを確実に表示 */
+			.print-text-target {
+				display: block !important;
+				visibility: visible !important;
+				opacity: 1 !important;
+			}
+
+			/* テーブルの印刷レイアウト調整 */
+			table {
+				width: 100% !important;
+				border-collapse: collapse !important;
+				page-break-inside: auto;
+			}
+
+			tr {
+				page-break-inside: avoid;
+				page-break-after: auto;
+				background: transparent !important;
+			}
+
+			th,
+			td {
+				border: 1px solid #555555 !important;
+				padding: 5px 7px !important;
+				vertical-align: top !important;
+				background: transparent !important;
+				color: #000000 !important;
+				box-shadow: none !important;
+			}
+
+			th {
+				background-color: #f3f4f6 !important;
+				font-weight: bold;
+				text-align: center !important;
+				font-size: 9pt !important;
+			}
+
+			/* 左上からスタートし、長さに応じて可変で収めるスタイル */
+			.print-content-box {
+				text-align: left !important;
+				vertical-align: top !important;
+				white-space: pre-wrap !important;
+				word-break: break-all !important;
+				overflow-wrap: anywhere !important;
+				line-height: 1.35 !important;
+			}
+
+			.print-transcription-box {
+				margin-top: 4px !important;
+				padding-top: 3px !important;
+				border-top: 1px dashed #999999 !important;
+				text-align: left !important;
+				white-space: pre-wrap !important;
+				word-break: break-all !important;
+				overflow-wrap: anywhere !important;
+				line-height: 1.25 !important;
+				color: #222222 !important;
+			}
+
+			/* 色の変化やTODAY背景などを印刷時にリセット */
+			td {
+				background-color: transparent !important;
+				color: #000000 !important;
+			}
+
+			/* Tailwindの印刷用表示の強制有効化 */
+			.print\:block {
+				display: block !important;
+			}
+
+			.print\:hidden {
+				display: none !important;
+			}
+		}
+	</style>
 </head>
+
 <body class="text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
 
-    <!-- トップナビゲーション -->
-    <header class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white shadow-lg no-print border-b-4 border-emerald-500">
-        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
-            
-            <div class="flex items-center space-x-3.5">
-                <div class="bg-emerald-500/20 border border-emerald-400/30 p-2.5 rounded-2xl backdrop-blur-md shadow-inner flex items-center justify-center">
-                    <i class="fa-solid fa-newspaper text-2xl text-emerald-300"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <h1 class="text-xl md:text-2xl font-black tracking-tight">静岡新聞『大自在』学習ノート</h1>
-                        <span class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Pro v3.0</span>
-                    </div>
-                    <p class="text-xs text-emerald-200/90 font-medium hidden sm:block">毎日読んで題名と感想を記録・自動同期保存</p>
-                </div>
-            </div>
+	<!-- トップナビゲーション -->
+	<header
+		class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white shadow-lg no-print border-b-4 border-emerald-500">
+		<div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
 
-            <!-- 右側ツール & クラウド/ローカル同期ステータス -->
-            <div class="flex items-center space-x-3">
-                <!-- 検索バー -->
-                <div class="relative hidden lg:block">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300/70 text-xs"></i>
-                    <input type="text" id="global-search" placeholder="感想や題名を検索..." 
+			<div class="flex items-center space-x-3.5">
+				<div
+					class="bg-emerald-500/20 border border-emerald-400/30 p-2.5 rounded-2xl backdrop-blur-md shadow-inner flex items-center justify-center">
+					<i class="fa-solid fa-newspaper text-2xl text-emerald-300"></i>
+				</div>
+				<div>
+					<div class="flex items-center space-x-2">
+						<h1 class="text-xl md:text-2xl font-black tracking-tight">静岡新聞『大自在』学習ノート</h1>
+						<span class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Pro v3.0</span>
+					</div>
+					<p class="text-xs text-emerald-200/90 font-medium hidden sm:block">毎日読んで題名と感想を記録・自動同期保存</p>
+				</div>
+			</div>
+
+			<!-- 右側ツール & クラウド/ローカル同期ステータス -->
+			<div class="flex items-center space-x-2.5">
+				<!-- 検索バー -->
+				<div class="relative hidden lg:block">
+					<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300/70 text-xs"></i>
+					<input type="text" id="global-search" placeholder="感想や題名を検索..."
                         class="bg-emerald-950/60 text-emerald-100 placeholder-emerald-400/60 text-xs rounded-xl pl-8 pr-3 py-2 border border-emerald-700/60 focus:outline-none focus:ring-2 focus:ring-emerald-400 w-48 transition-all focus:w-64">
                 </div>
 
-                <!-- ステータスバッジ（保存状態表示） -->
-                <div id="status-badge-container" class="flex items-center space-x-2 bg-emerald-950/90 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs transition-all duration-300">
-                    <span id="sync-status-icon" class="text-emerald-300 text-xs flex items-center justify-center">
+					<!-- ステータスバッジ（保存状態表示） -->
+					<div id="status-badge-container"
+						class="flex items-center space-x-2 bg-emerald-950/90 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs transition-all duration-300">
+						<span id="sync-status-icon" class="text-emerald-300 text-xs flex items-center justify-center">
                         <i class="fa-solid fa-circle-check"></i>
                     </span>
-                    <span id="sync-status-text" class="text-emerald-100 text-[11px] font-medium tracking-tight">保存済み</span>
-                </div>
-            </div>
-        </div>
-    </header>
+						<span id="sync-status-text" class="text-emerald-100 text-[11px] font-medium tracking-tight">保存済み</span>
+					</div>
+				</div>
+			</div>
+	</header>
 
-    <!-- 自動保存に関する安心バナー -->
-    <div class="bg-emerald-100/90 border-b border-emerald-200 text-emerald-900 px-4 py-1.5 text-xs font-bold no-print flex items-center justify-between shadow-inner">
-        <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full flex items-center space-x-1">
+	<!-- 自動保存に関する安心バナー -->
+	<div
+		class="bg-emerald-100/90 border-b border-emerald-200 text-emerald-900 px-4 py-1.5 text-xs font-bold no-print flex items-center justify-between shadow-inner">
+		<div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+			<div class="flex items-center space-x-2">
+				<span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full flex items-center space-x-1">
                     <i class="fa-solid fa-shield-halved text-[9px]"></i>
                     <span>自動保存 ON</span>
-                </span>
-                <span class="hidden sm:inline">入力・変更は端末とクラウドに即時保存されます。</span>
-            </div>
-            <div class="text-[11px] text-emerald-800 font-number">
-                <span id="banner-last-saved">最終保存: --:--:--</span>
-            </div>
-        </div>
-    </div>
+				</span>
+				<span class="hidden sm:inline">入力・変更は端末とクラウドに即時保存されます。</span>
+			</div>
+			<div class="text-[11px] text-emerald-800 font-number">
+				<span id="banner-last-saved">最終保存: --:--:--</span>
+			</div>
+		</div>
+	</div>
 
-    <!-- メインコンテンツ -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-5">
+	<!-- メインコンテンツ -->
+	<main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-5">
 
-        <!-- ダッシュボード (実績サマリー) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 no-print">
-            <!-- 読了数カード -->
-            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-emerald-300 transition">
-                <div class="p-3 bg-emerald-100/70 text-emerald-700 rounded-xl">
-                    <i class="fa-solid fa-book-open text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] font-bold text-slate-500">今月の読了数</div>
-                    <div class="text-lg font-black text-slate-800 font-number">
-                        <span id="stat-completed" class="text-emerald-600 text-xl">0</span>
-                        <span class="text-xs text-slate-400 font-normal">/ <span id="stat-total">0</span> 日</span>
-                    </div>
-                </div>
-            </div>
+		<!-- ダッシュボード (実績サマリー) -->
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 no-print">
+			<!-- 読了数カード -->
+			<div
+				class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-emerald-300 transition">
+				<div
+					class="w-11 h-11 bg-emerald-100/70 border border-emerald-200/60 text-emerald-700 rounded-xl flex items-center justify-center shrink-0">
+					<i class="fa-solid fa-book-open text-xl"></i>
+				</div>
+				<div>
+					<div class="text-[11px] font-bold text-slate-500">今月の読了数</div>
+					<div class="text-lg font-black text-slate-800 font-number">
+						<span id="stat-completed" class="text-emerald-600 text-xl">0</span>
+						<span class="text-xs text-slate-400 font-normal">/ <span id="stat-total">0</span> 日</span>
+					</div>
+				</div>
+			</div>
 
-            <!-- 達成率カード -->
-            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-emerald-300 transition">
-                <div class="p-3 bg-teal-100/70 text-teal-700 rounded-xl">
-                    <i class="fa-solid fa-chart-pie text-xl"></i>
-                </div>
-                <div class="flex-grow">
-                    <div class="text-[11px] font-bold text-slate-500">達成率</div>
-                    <div class="flex items-center justify-between">
-                        <span id="stat-percentage" class="text-lg font-black text-teal-700 font-number">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
-                        <div id="stat-progress-bar" class="bg-teal-500 h-full w-0 transition-all duration-500"></div>
-                    </div>
-                </div>
-            </div>
+			<!-- 達成率カード (シンプルなトレンドグラフアイコン) -->
+			<div
+				class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-teal-300 transition">
+				<div
+					class="w-11 h-11 bg-teal-100/70 border border-teal-200/60 text-teal-700 rounded-xl flex items-center justify-center shrink-0">
+					<i class="fa-solid fa-chart-line text-xl text-teal-600"></i>
+				</div>
+				<div class="flex-grow min-w-0">
+					<div class="text-[11px] font-bold text-slate-500">達成率</div>
+					<div class="flex items-baseline space-x-1">
+						<span id="stat-percentage" class="text-lg font-black text-teal-700 font-number">0%</span>
+					</div>
+					<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1 border border-slate-200/50">
+						<div id="stat-progress-bar"
+							class="bg-gradient-to-r from-teal-500 to-emerald-500 h-full w-0 transition-all duration-500 rounded-full">
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <!-- 連続読了日数カード -->
-            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-amber-300 transition">
-                <div class="p-3 bg-amber-100/70 text-amber-600 rounded-xl">
-                    <i class="fa-solid fa-fire text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] font-bold text-slate-500">現在の継続日数</div>
-                    <div class="text-lg font-black text-slate-800 font-number">
-                        <span id="stat-streak" class="text-amber-600 text-xl">0</span>
-                        <span class="text-xs text-slate-400 font-normal">日連続 🔥</span>
-                    </div>
-                </div>
-            </div>
+			<!-- 連続読了日数カード -->
+			<div
+				class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-amber-300 transition">
+				<div
+					class="w-11 h-11 bg-amber-100/70 border border-amber-200/60 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+					<i class="fa-solid fa-fire text-xl"></i>
+				</div>
+				<div>
+					<div class="text-[11px] font-bold text-slate-500">現在の継続日数</div>
+					<div class="text-lg font-black text-slate-800 font-number">
+						<span id="stat-streak" class="text-amber-600 text-xl">0</span>
+						<span class="text-xs text-slate-400 font-normal">日連続 🔥</span>
+					</div>
+				</div>
+			</div>
 
-            <!-- 総文字数カード -->
-            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-indigo-300 transition">
-                <div class="p-3 bg-indigo-100/70 text-indigo-700 rounded-xl">
-                    <i class="fa-solid fa-pen-nib text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-[11px] font-bold text-slate-500">今月の総記述量</div>
-                    <div class="text-lg font-black text-slate-800 font-number">
-                        <span id="stat-char-count" class="text-indigo-600 text-xl">0</span>
-                        <span class="text-xs text-slate-400 font-normal">文字</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+			<!-- 総文字数カード -->
+			<div
+				class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-3 hover:border-indigo-300 transition">
+				<div
+					class="w-11 h-11 bg-indigo-100/70 border border-indigo-200/60 text-indigo-700 rounded-xl flex items-center justify-center shrink-0">
+					<i class="fa-solid fa-pen-nib text-xl"></i>
+				</div>
+				<div>
+					<div class="text-[11px] font-bold text-slate-500">今月の総記述量</div>
+					<div class="text-lg font-black text-slate-800 font-number">
+						<span id="stat-char-count" class="text-indigo-600 text-xl">0</span>
+						<span class="text-xs text-slate-400 font-normal">文字</span>
+					</div>
+				</div>
+			</div>
+		</div>
 
-        <!-- コントロールバー（モダン年月ナビゲーター & 表示切替 & アクション） -->
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print relative">
-            
-            <!-- 洗練された年月ナビゲーター (カスタムUI) -->
-            <div class="flex items-center space-x-2 relative">
-                <!-- 前月ボタン -->
-                <button id="btn-prev-month" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 rounded-xl transition font-bold shadow-sm active:scale-95">
+		<!-- コントロールバー（モダン年月ナビゲーター & 表示切替 & アクション） -->
+		<div
+			class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print relative">
+
+			<!-- 洗練された年月ナビゲーター (カスタムUI) -->
+			<div class="flex items-center space-x-2 relative">
+				<!-- 前月ボタン -->
+				<button id="btn-prev-month" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 rounded-xl transition font-bold shadow-sm active:scale-95">
                     <i class="fa-solid fa-chevron-left text-xs"></i>
                 </button>
 
-                <!-- メイン年月選択トリガーボタン -->
-                <div class="relative">
-                    <button id="btn-month-picker-toggle" class="flex items-center space-x-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-300/80 px-4 py-2 rounded-xl text-emerald-950 font-black text-base shadow-sm transition active:scale-98">
+				<!-- メイン年月選択トリガーボタン -->
+				<div class="relative">
+					<button id="btn-month-picker-toggle" class="flex items-center space-x-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-300/80 px-4 py-2 rounded-xl text-emerald-950 font-black text-base shadow-sm transition active:scale-98">
                         <i class="fa-solid fa-calendar-days text-emerald-600"></i>
                         <span id="picker-display-label" class="font-number">2026年 7月</span>
                         <i class="fa-solid fa-chevron-down text-emerald-500 text-xs ml-1"></i>
                     </button>
 
-                    <!-- ポップアップ式 カスタム年月セレクターパネル -->
-                    <div id="month-picker-popover" class="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-emerald-100 p-4 w-72 z-50 hidden animate-view-change">
-                        <!-- 年切り替えヘッダー -->
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
-                            <button id="btn-picker-prev-year" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition">
+					<!-- ポップアップ式 カスタム年月セレクターパネル -->
+					<div id="month-picker-popover"
+						class="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-emerald-100 p-4 w-72 z-50 hidden animate-view-change">
+						<!-- 年切り替えヘッダー -->
+						<div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
+							<button id="btn-picker-prev-year" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition">
                                 <i class="fa-solid fa-chevron-left text-xs"></i>
                             </button>
-                            <span id="picker-year-label" class="font-black text-sm text-slate-800 font-number">2026年</span>
-                            <button id="btn-picker-next-year" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition">
+							<span id="picker-year-label" class="font-black text-sm text-slate-800 font-number">2026年</span>
+							<button id="btn-picker-next-year" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition">
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
-                        </div>
-                        <!-- 12ヶ月のグリッド -->
-                        <div class="grid grid-cols-3 gap-2" id="picker-months-grid">
-                            <!-- JSで動的描画 -->
-                        </div>
-                    </div>
-                </div>
+						</div>
+						<!-- 12ヶ月のグリッド -->
+						<div class="grid grid-cols-3 gap-2" id="picker-months-grid">
+							<!-- JSで動的描画 -->
+						</div>
+					</div>
+				</div>
 
-                <!-- 次月ボタン -->
-                <button id="btn-next-month" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 rounded-xl transition font-bold shadow-sm active:scale-95">
+				<!-- 次月ボタン -->
+				<button id="btn-next-month" class="w-9 h-9 flex items-center justify-center bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 rounded-xl transition font-bold shadow-sm active:scale-95">
                     <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
 
-                <!-- 今月へ移動 -->
-                <button id="btn-today" class="bg-emerald-100/70 hover:bg-emerald-200/80 text-emerald-900 text-xs font-bold px-3 py-2.5 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+				<!-- 今月へ移動 -->
+				<button id="btn-today" class="bg-emerald-100/70 hover:bg-emerald-200/80 text-emerald-900 text-xs font-bold px-3 py-2.5 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-bullseye text-emerald-700"></i>
                     <span>今月</span>
                 </button>
-            </div>
+			</div>
 
-            <!-- 表示モード切り替えタブ (スプレッドシート / カレンダー) -->
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                <button id="btn-view-table" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-emerald-900 shadow-sm">
+			<!-- 表示モード切り替えタブ (スプレッドシート / カレンダー) -->
+			<div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+				<button id="btn-view-table" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-white text-emerald-900 shadow-sm">
                     <i class="fa-solid fa-table-cells"></i>
                     <span>スプレッドシート</span>
                 </button>
-                <button id="btn-view-calendar" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900">
+				<button id="btn-view-calendar" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900">
                     <i class="fa-regular fa-calendar-check"></i>
                     <span>カレンダー</span>
                 </button>
-            </div>
+			</div>
 
-            <!-- フィルタ & 出力アクション -->
-            <div class="flex items-center space-x-2">
-                <!-- 絞り込みフィルター -->
-                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-                    <button data-filter="all" class="btn-filter px-2.5 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-sm">すべて</button>
-                    <button data-filter="completed" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">読了のみ</button>
-                    <button data-filter="incomplete" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">未記述</button>
-                </div>
+			<!-- フィルタ & 出力アクション -->
+			<div class="flex items-center space-x-2">
+				<!-- 絞り込みフィルター -->
+				<div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+					<button data-filter="all" class="btn-filter px-2.5 py-1 rounded-lg font-bold bg-white text-slate-800 shadow-sm">すべて</button>
+					<button data-filter="completed" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">読了のみ</button>
+					<button data-filter="incomplete" class="btn-filter px-2.5 py-1 rounded-lg font-bold text-slate-500 hover:text-slate-800">未記述</button>
+				</div>
 
-                <!-- 印刷ボタン -->
-                <button id="btn-print" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center space-x-1 transition" title="印刷用画面表示">
+				<!-- 印刷ボタン -->
+				<button id="btn-print" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center space-x-1 transition" title="印刷用画面表示">
                     <i class="fa-solid fa-print"></i>
                     <span class="hidden sm:inline">印刷</span>
                 </button>
 
-                <!-- CSV出力ボタン -->
-                <button id="btn-export-csv" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition flex items-center space-x-1">
+				<!-- CSV出力ボタン -->
+				<button id="btn-export-csv" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition flex items-center space-x-1">
                     <i class="fa-solid fa-file-csv"></i>
                     <span class="hidden sm:inline">CSV</span>
                 </button>
-            </div>
-        </div>
+			</div>
+		</div>
 
-        <!-- 現在選択中表示 ＆ 検索・フィルター適用状態インジケーター -->
-        <div class="bg-emerald-900 text-white px-5 py-2.5 rounded-2xl shadow-sm flex flex-wrap items-center justify-between no-print gap-2">
-            <div class="flex items-center space-x-3">
-                <span id="current-month-badge" class="bg-emerald-400 text-emerald-950 font-black text-base md:text-lg px-3.5 py-0.5 rounded-xl font-number">
+		<!-- 現在選択中表示 ＆ 検索・フィルター適用状態インジケーター -->
+		<div
+			class="bg-emerald-900 text-white px-5 py-2.5 rounded-2xl shadow-sm flex flex-wrap items-center justify-between no-print gap-2">
+			<div class="flex items-center space-x-3">
+				<span id="current-month-badge" class="bg-emerald-400 text-emerald-950 font-black text-base md:text-lg px-3.5 py-0.5 rounded-xl font-number">
                     ----年 --月
                 </span>
-                <span id="view-mode-title" class="text-xs font-semibold text-emerald-100">の学習ログを表示中</span>
-            </div>
-            <div id="search-active-indicator" class="hidden text-xs bg-amber-400 text-amber-950 font-bold px-3 py-1 rounded-xl flex items-center space-x-2">
-                <i class="fa-solid fa-filter"></i>
-                <span id="search-active-text">検索条件を適用中</span>
-                <button id="btn-clear-search" class="bg-amber-950 text-amber-100 text-[10px] px-2 py-0.5 rounded-lg hover:bg-amber-900 transition">
+				<span id="view-mode-title" class="text-xs font-semibold text-emerald-100">の学習ログを表示中</span>
+			</div>
+			<div id="search-active-indicator"
+				class="hidden text-xs bg-amber-400 text-amber-950 font-bold px-3 py-1 rounded-xl flex items-center space-x-2">
+				<i class="fa-solid fa-filter"></i>
+				<span id="search-active-text">検索条件を適用中</span>
+				<button id="btn-clear-search" class="bg-amber-950 text-amber-100 text-[10px] px-2 py-0.5 rounded-lg hover:bg-amber-900 transition">
                     条件解除
                 </button>
-            </div>
-        </div>
+			</div>
+		</div>
 
-        <!-- メインビュー領域 (スプレッドシート & カレンダー) -->
-        <div id="view-container" class="animate-view-change">
-            
-            <!-- 1. スプレッドシート表示 -->
-            <div id="spreadsheet-wrapper" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="spreadsheet-container">
-                    <table class="w-full border-collapse text-left text-sm">
-                        <thead>
-                            <tr class="sticky-header text-xs font-bold border-b border-emerald-900">
-                                <th class="py-3 px-3 w-16 text-center">日付</th>
-                                <th class="py-3 px-3 w-14 text-center">読了</th>
-                                <th class="py-3 px-4 w-1/4">自分で考えた題名 (見出し)</th>
-                                <th class="py-3 px-4 w-2/5">感想・学び・要約</th>
-                                <th class="py-3 px-3 w-36 hidden md:table-cell">キーワード</th>
-                                <th class="py-3 px-3 w-20 text-center no-print">詳細</th>
-                            </tr>
-                        </thead>
-                        <tbody id="spreadsheet-body" class="divide-y divide-slate-100 bg-white">
-                            <!-- JSで生成 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+		<!-- 印刷用タイトル（紙面印刷時のみ表示・中央揃え） -->
+		<div class="hidden print-only mb-4 border-b-2 border-slate-800 pb-2 text-center">
+			<h1 class="text-xl font-bold text-center text-slate-900">
+				静岡新聞『大自在』学習・感想提出シート
+			</h1>
+			<div class="flex justify-between items-end text-xs mt-2 font-bold text-slate-700 px-4">
+				<span>対象年月: <strong id="print-year-month" class="text-sm">----年 --月</strong></span>
+				<span>氏名: ___________________________</span>
+			</div>
+		</div>
 
-            <!-- 2. カレンダー表示 (初期状態は非表示) -->
-            <div id="calendar-wrapper" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                <div class="grid grid-cols-7 gap-2 text-center text-xs font-black text-slate-500 pb-3 border-b border-slate-200">
-                    <div class="text-rose-600">日</div>
-                    <div>月</div>
-                    <div>火</div>
-                    <div>水</div>
-                    <div>木</div>
-                    <div>金</div>
-                    <div class="text-blue-600">土</div>
-                </div>
-                <div id="calendar-grid" class="grid grid-cols-7 gap-2 pt-3">
-                    <!-- JSで動的生成 -->
-                </div>
-            </div>
+		<!-- メインビュー領域 (スプレッドシート & カレンダー) -->
+		<div id="view-container" class="animate-view-change">
 
-        </div>
+			<!-- 1. スプレッドシート表示 -->
+			<div id="spreadsheet-wrapper"
+				class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+				<div class="spreadsheet-container">
+					<table class="w-full border-collapse text-left text-sm">
+						<thead>
+							<tr class="sticky-header text-xs font-bold border-b border-emerald-900">
+								<th class="py-3 px-3 w-16 text-center">日付</th>
+								<th class="py-3 px-3 w-14 text-center print-hidden">読了</th>
+								<th class="py-3 px-4 w-1/4 text-center">自分で考えた題名 (見出し)</th>
+								<th class="py-3 px-4 w-2/5 text-center">感想・学び・要約・本文</th>
+								<th class="py-3 px-3 w-36 hidden md:table-cell print:table-cell text-center">キーワード</th>
+								<th class="py-3 px-3 w-28 text-center no-print">詳細 / AI解析</th>
+							</tr>
+						</thead>
+						<tbody id="spreadsheet-body" class="divide-y divide-slate-100 bg-white">
+							<!-- JSで生成 -->
+						</tbody>
+					</table>
+				</div>
+			</div>
 
-        <!-- 印刷用ヘッダー（印刷時のみ表示） -->
-        <div class="hidden print-only mb-6">
-            <h1 class="text-2xl font-bold text-center border-b-2 border-black pb-2 mb-2">
-                静岡新聞『大自在』学習・感想提出シート
-            </h1>
-            <div class="flex justify-between text-sm">
-                <span>対象年月: <strong id="print-year-month">----年 --月</strong></span>
-                <span>氏名: ___________________________</span>
-            </div>
-        </div>
+			<!-- 2. カレンダー表示 (初期状態は非表示) -->
+			<div id="calendar-wrapper" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+				<div
+					class="grid grid-cols-7 gap-2 text-center text-xs font-black text-slate-500 pb-3 border-b border-slate-200">
+					<div class="text-rose-600">日</div>
+					<div>月</div>
+					<div>火</div>
+					<div>水</div>
+					<div>木</div>
+					<div>金</div>
+					<div class="text-blue-600">土</div>
+				</div>
+				<div id="calendar-grid" class="grid grid-cols-7 gap-2 pt-3">
+					<!-- JSで動的生成 -->
+				</div>
+			</div>
 
-    </main>
+		</div>
 
-    <!-- 詳細編集モーダル -->
-    <div id="modal-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] animate-view-change">
-            
-            <!-- モーダルヘッダー -->
-            <div class="flex justify-between items-center pb-3.5 border-b border-slate-200">
-                <div class="flex items-center space-x-3">
-                    <span id="modal-date-badge" class="bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-sm font-number"></span>
-                    <h2 class="text-lg font-bold text-slate-800">大自在 学習ノート入力</h2>
-                </div>
-                <button id="btn-modal-close" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition">
+	</main>
+
+	<!-- 詳細編集モーダル -->
+	<div id="modal-detail"
+		class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+		<div
+			class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] animate-view-change">
+
+			<!-- モーダルヘッダー -->
+			<div class="flex justify-between items-center pb-3.5 border-b border-slate-200">
+				<div class="flex items-center space-x-3">
+					<span id="modal-date-badge" class="bg-emerald-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-sm font-number"></span>
+					<h2 class="text-lg font-bold text-slate-800">大自在 学習ノート入力</h2>
+				</div>
+				<button id="btn-modal-close" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
-            </div>
+			</div>
 
-            <!-- モーダルコンテンツ -->
-            <div class="py-4 space-y-4 overflow-y-auto flex-grow pr-1">
-                <!-- 読了トグル -->
-                <label class="flex items-center space-x-3 cursor-pointer bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 hover:bg-emerald-100/60 transition">
+			<!-- モーダルコンテンツ -->
+			<div class="py-4 space-y-4 overflow-y-auto flex-grow pr-1">
+				<!-- 読了トグル -->
+				<label class="flex items-center space-x-3 cursor-pointer bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 hover:bg-emerald-100/60 transition">
                     <input type="checkbox" id="modal-status" class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 cursor-pointer">
                     <span class="font-bold text-emerald-950 text-sm">この記事を読んだ（読了完了）</span>
                 </label>
 
-                <!-- 元記事キーワード -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">元の記事テーマ / キーワード（メモ）</label>
-                    <input type="text" id="modal-original-title" placeholder="例: 熱中症対策、富士山環境保全、AI技術 など"
+				<!-- AI写真文字起こしセクション（Gemini 2.5 Pro） -->
+				<div
+					class="bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 p-3.5 rounded-2xl border border-emerald-200/90 space-y-3">
+					<div class="flex items-center justify-between flex-wrap gap-2">
+						<div class="flex items-center space-x-2">
+							<i class="fa-solid fa-wand-magic-sparkles text-emerald-600 text-sm"></i>
+							<span class="text-xs font-bold text-slate-800">新聞写真からAI自動文字起こし</span>
+							<span class="bg-emerald-200/80 text-emerald-900 text-[10px] font-black px-1.5 py-0.5 rounded-md font-number">Gemini 2.5 Pro</span>
+						</div>
+						<button type="button" id="btn-trigger-camera" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm transition flex items-center space-x-1">
+                            <i class="fa-solid fa-camera"></i>
+                            <span>写真を撮影 / 選択</span>
+                        </button>
+						<input type="file" id="input-newspaper-image" accept="image/*" capture="environment" class="hidden">
+                    </div>
+
+						<!-- 画像プレビュー & 解析ボタン領域 -->
+						<div id="ai-preview-container"
+							class="hidden flex flex-col sm:flex-row items-center gap-3 bg-white p-2.5 rounded-xl border border-emerald-200">
+							<img id="ai-image-preview" src="" alt="新聞写真プレビュー" class="w-24 h-24 object-cover rounded-lg border border-slate-200 shadow-sm">
+							<div class="flex-grow w-full space-y-2">
+								<div id="ai-status-msg"
+									class="text-xs text-slate-600 font-medium flex items-center space-x-1.5">
+									<i class="fa-solid fa-image text-emerald-600"></i>
+									<span>写真がセットされました</span>
+								</div>
+								<button type="button" id="btn-run-transcribe" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs py-2 rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span>AI解析・文字起こしを実行</span>
+                            </button>
+							</div>
+						</div>
+
+						<!-- 文字起こし結果テキスト表示エリア -->
+						<div id="transcription-result-box" class="hidden space-y-1.5">
+							<div class="flex items-center justify-between">
+								<label class="text-[11px] font-bold text-emerald-900 flex items-center space-x-1">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span>【文字起こし結果】大自在 本文</span>
+                            </label>
+								<button type="button" id="btn-copy-transcription" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-2.5 py-1 rounded-lg transition flex items-center space-x-1">
+                                <i class="fa-solid fa-paste"></i>
+                                <span>感想欄に文字起こしを挿入</span>
+                            </button>
+							</div>
+							<textarea id="modal-transcription" rows="4" placeholder="AIによる文字起こし本文がここに記録されます..."
+                            class="w-full px-3 py-2 border border-emerald-200 rounded-xl text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none leading-relaxed text-slate-800 font-mono"></textarea>
+						</div>
+					</div>
+
+					<!-- 元記事キーワード -->
+					<div>
+						<label class="block text-xs font-bold text-slate-600 mb-1">元の記事テーマ / キーワード（メモ）</label>
+						<input type="text" id="modal-original-title" placeholder="例: 熱中症対策、富士山環境保全、AI技術 など"
                         class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
                 </div>
 
-                <!-- 自分で考えた題名 -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">自分で考えた題名 <span class="text-rose-500 font-bold">* 必須</span></label>
-                    <input type="text" id="modal-custom-title" placeholder="記事をひとことで表すオリジナル見出しを入力"
-                        class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+						<!-- 自分で考えた題名 -->
+						<div>
+							<label class="block text-xs font-bold text-slate-600 mb-1">自分で考えた題名 <span class="text-rose-500 font-bold">* 必須</span></label>
+							<input type="text" id="modal-custom-title" placeholder="記事をひとことで表すオリジナル見出しを入力"
+                        class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-center">
                 </div>
 
-                <!-- 感想・要約 ＆ テンプレート挿入ボタン -->
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs font-bold text-slate-600">感想・意見・学び・要約 <span class="text-rose-500 font-bold">* 必須</span></label>
-                        <span id="modal-char-count" class="text-xs font-bold text-slate-400 font-number">0 文字</span>
-                    </div>
+							<!-- 感想・要約 ＆ テンプレート挿入ボタン -->
+							<div>
+								<div class="flex justify-between items-center mb-1.5">
+									<label class="block text-xs font-bold text-slate-600">感想・意見・学び・要約 <span class="text-rose-500 font-bold">* 必須</span></label>
+									<span id="modal-char-count" class="text-xs font-bold text-slate-400 font-number">0 文字</span>
+								</div>
 
-                    <!-- 書き方アシストテンプレートボタン -->
-                    <div class="flex flex-wrap gap-1.5 mb-2">
-                        <span class="text-[10px] font-bold text-slate-400 py-1">💡 ヒント:</span>
-                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+								<!-- 書き方アシストテンプレートボタン -->
+								<div class="flex flex-wrap gap-1.5 mb-2">
+									<span class="text-[10px] font-bold text-slate-400 py-1">💡 ヒント:</span>
+									<button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
                             data-template="この記事を読んで、筆者が伝えたいことは〜〜だと感じた。自分なら〜〜したい。">
                             要約と意見
                         </button>
-                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+									<button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
                             data-template="〜〜という言葉が心に残った。なぜなら〜〜だからだ。">
                             印象的な言葉
                         </button>
-                        <button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
+									<button type="button" class="btn-template text-[11px] bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-900 font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition"
                             data-template="今回のテーマについて、これまで〜〜と思っていたが、読んだ後は〜〜と考えを改めた。">
                             考えの変化
                         </button>
-                    </div>
+								</div>
 
-                    <textarea id="modal-content" rows="5" placeholder="大自在を読んで感じたことや、自分の言葉で要約した内容を入力しましょう。"
+								<textarea id="modal-content" rows="5" placeholder="大自在を読んで感じたことや、自分の言葉で要約した内容を入力しましょう。"
                         class="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none leading-relaxed transition"></textarea>
-                </div>
-            </div>
+							</div>
+						</div>
 
-            <!-- モーダルアクション -->
-            <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2.5">
-                <button id="btn-modal-cancel" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+						<!-- モーダルアクション -->
+						<div class="pt-3 border-t border-slate-200 flex justify-end space-x-2.5">
+							<button id="btn-modal-cancel" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
                     キャンセル
                 </button>
-                <button id="btn-modal-save" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-1.5">
+							<button id="btn-modal-save" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-floppy-disk"></i>
                     <span>保存する</span>
                 </button>
-            </div>
-        </div>
-    </div>
+						</div>
+					</div>
+				</div>
 
-    <!-- Firebase SDK & Application Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+				<!-- Firebase SDK & Application Logic -->
+				<script type="module">
+					import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
             signInAnonymously, 
@@ -453,6 +681,12 @@
             collection, 
             onSnapshot 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ========================================================
+        // 🔑 Google AI Studio API Key 設定欄
+        // 下の引用符の中に、ご自身のGemini APIキーを貼り付けてください
+        // ========================================================
+        const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 
         // アプリケーションIDとFirebase構成
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'daijizai-diary-app';
@@ -488,6 +722,9 @@
         let currentFilter = 'all'; // 'all' | 'completed' | 'incomplete'
         let searchQuery = '';
         let pickerSelectedYear = currentYear;
+
+        let currentSelectedBase64Image = null;
+        let currentSelectedMimeType = 'image/jpeg';
 
         const LOCAL_STORAGE_KEY = 'daijizai_logs_store';
 
@@ -710,7 +947,8 @@
                     status: false,
                     customTitle: '',
                     content: '',
-                    originalTitle: ''
+                    originalTitle: '',
+                    transcription: ''
                 };
 
                 // フィルターチェック
@@ -722,7 +960,8 @@
                     const q = searchQuery.toLowerCase();
                     const match = (item.customTitle || '').toLowerCase().includes(q) ||
                                   (item.content || '').toLowerCase().includes(q) ||
-                                  (item.originalTitle || '').toLowerCase().includes(q);
+                                  (item.originalTitle || '').toLowerCase().includes(q) ||
+                                  (item.transcription || '').toLowerCase().includes(q);
                     if (!match) continue;
                 }
 
@@ -740,38 +979,89 @@
                     dayTextColor = 'text-blue-600 font-bold';
                 }
 
+                // 文字数に応じた印刷時フォントサイズの自動縮小ロジック
+                const contentLen = (item.content || '').length;
+                let printContentFontSizeClass = "text-xs";
+                if (contentLen > 200) {
+                    printContentFontSizeClass = "text-[7.5pt]";
+                } else if (contentLen > 90) {
+                    printContentFontSizeClass = "text-[8.5pt]";
+                } else {
+                    printContentFontSizeClass = "text-[9.5pt]";
+                }
+
+                const transLen = (item.transcription || '').length;
+                let printTransFontSizeClass = "text-[7.5pt]";
+                if (transLen > 400) {
+                    printTransFontSizeClass = "text-[6.5pt]";
+                } else if (transLen > 200) {
+                    printTransFontSizeClass = "text-[7pt]";
+                }
+
                 const tr = document.createElement('tr');
                 tr.className = `hover:bg-emerald-50/60 transition border-b border-slate-100 ${isToday ? 'bg-amber-50/80 border-l-4 border-l-amber-500' : ''}`;
 
                 tr.innerHTML = `
                     <td class="py-2.5 px-3 text-center font-bold ${dayTextColor} ${dayBgClass}">
                         <div class="text-sm font-number">${day}日</div>
-                        <div class="text-[10px] opacity-80">(${dayName})</div>
-                        ${isToday ? '<span class="inline-block bg-amber-500 text-white text-[9px] font-black px-1.5 rounded mt-0.5">TODAY</span>' : ''}
+                        <div class="text-[10px] opacity-80 no-print">(${dayName})</div>
+                        <div class="hidden print:block text-[9px] font-normal font-sans">(${dayName})</div>
+                        ${isToday ? '<span class="inline-block bg-amber-500 text-white text-[9px] font-black px-1.5 rounded mt-0.5 no-print">TODAY</span>' : ''}
                     </td>
-                    <td class="py-2.5 px-3 text-center">
+                    <td class="py-2.5 px-3 text-center print-hidden">
                         <input type="checkbox" data-date="${dateStr}" class="chk-status w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer" ${item.status ? 'checked' : ''}>
                     </td>
-                    <td class="py-2 px-3">
+                    <td class="py-2 px-3 text-center">
+                        <!-- 画面編集用（中央揃え） -->
                         <input type="text" data-date="${dateStr}" data-field="customTitle" value="${escapeHtml(item.customTitle || '')}" 
                             placeholder="自分で考えた題名を入力..."
-                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs font-bold text-slate-800 transition">
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs font-bold text-slate-800 transition text-center no-print">
+                        
+                        <!-- 印刷用テキスト (中央揃え・画面上は絶対非表示) -->
+                        <div class="print-text-target print-title-target font-bold text-slate-900 leading-snug break-words text-xs text-center">
+                            ${escapeHtml(item.customTitle || '') || '<span class="text-slate-300">-</span>'}
+                        </div>
                     </td>
                     <td class="py-2 px-3">
+                        <!-- 画面編集用 -->
                         <input type="text" data-date="${dateStr}" data-field="content" value="${escapeHtml(item.content || '')}" 
                             placeholder="感想や学んだ要約を入力..."
-                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs transition">
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-300 bg-slate-50/40 text-xs transition no-print">
+                        
+                        <!-- 印刷用テキスト (感想：画面上は絶対非表示・印刷時確実に表示) -->
+                        <div class="print-text-target print-content-box text-slate-900 ${printContentFontSizeClass}">
+                            ${escapeHtml(item.content || '') || '<span class="text-slate-300 print:hidden">-</span>'}
+                        </div>
+
+                        <!-- 印刷用：文字起こし本文がある場合 -->
+                        ${item.transcription ? `
+                            <div class="print-text-target print-transcription-box ${printTransFontSizeClass} font-mono">
+                                <strong class="text-[7pt] text-slate-500 block mb-0.5">【大自在 本文】</strong>
+                                ${escapeHtml(item.transcription)}
+                            </div>
+                        ` : ''}
                     </td>
-                    <td class="py-2 px-3 hidden md:table-cell">
+                    <td class="py-2 px-3 hidden md:table-cell print:table-cell text-center">
+                        <!-- 画面編集用 -->
                         <input type="text" data-date="${dateStr}" data-field="originalTitle" value="${escapeHtml(item.originalTitle || '')}" 
                             placeholder="キーワード..."
-                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white text-xs text-slate-500 transition">
+                            class="input-cell w-full px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white text-xs text-slate-500 transition text-center no-print">
+                        
+                        <!-- 印刷用テキスト -->
+                        <div class="print-text-target print-keyword-target text-xs text-slate-600 break-words text-center">
+                            ${escapeHtml(item.originalTitle || '') || '<span class="text-slate-300">-</span>'}
+                        </div>
                     </td>
                     <td class="py-2 px-3 text-center no-print">
-                        <button data-date="${dateStr}" class="btn-open-modal text-emerald-700 hover:text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 px-2.5 py-1 rounded-lg font-bold text-xs transition flex items-center justify-center space-x-1 mx-auto" title="詳しく編集">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                            <span class="hidden sm:inline">編集</span>
-                        </button>
+                        <div class="flex items-center justify-center space-x-1">
+                            <button data-date="${dateStr}" class="btn-open-modal text-emerald-700 hover:text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 px-2 py-1 rounded-lg font-bold text-xs transition flex items-center justify-center space-x-1" title="詳しく編集">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span class="hidden sm:inline">編集</span>
+                            </button>
+                            <button data-date="${dateStr}" class="btn-quick-camera text-teal-700 hover:text-teal-900 bg-teal-100/70 hover:bg-teal-200 p-1.5 rounded-lg font-bold text-xs transition" title="カメラで新聞を撮影して文字起こし">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
 
@@ -837,7 +1127,8 @@
                     const q = searchQuery.toLowerCase();
                     const match = (item.customTitle || '').toLowerCase().includes(q) ||
                                   (item.content || '').toLowerCase().includes(q) ||
-                                  (item.originalTitle || '').toLowerCase().includes(q);
+                                  (item.originalTitle || '').toLowerCase().includes(q) ||
+                                  (item.transcription || '').toLowerCase().includes(q);
                     if (!match) continue;
                 }
 
@@ -853,10 +1144,13 @@
                 cell.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="font-black text-xs font-number ${isToday ? 'text-amber-600' : 'text-slate-700'}">${day}</span>
-                        ${item.status ? '<span class="text-emerald-600 text-xs"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                        <div class="flex items-center space-x-1">
+                            ${item.transcription ? '<span class="text-teal-600 text-[10px]" title="AI文字起こし保存済み"><i class="fa-solid fa-microchip"></i></span>' : ''}
+                            ${item.status ? '<span class="text-emerald-600 text-xs"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                        </div>
                     </div>
                     <div class="my-1 flex-grow">
-                        ${item.customTitle ? `<p class="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight">${escapeHtml(item.customTitle)}</p>` : `<span class="text-[10px] text-slate-300 italic">未入力</span>`}
+                        ${item.customTitle ? `<p class="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight text-center">${escapeHtml(item.customTitle)}</p>` : `<span class="text-[10px] text-slate-300 italic block text-center">未入力</span>`}
                     </div>
                     <div class="text-[9px] text-slate-400 text-right">
                         ${item.content ? '<i class="fa-solid fa-align-left text-emerald-600"></i>' : ''}
@@ -957,6 +1251,24 @@
             });
 
             document.querySelectorAll('.input-cell').forEach(input => {
+                // リアルタイムに入力された内容を印刷用Divに即時反映
+                input.addEventListener('input', (e) => {
+                    const field = e.target.getAttribute('data-field');
+                    const val = e.target.value;
+                    const cell = e.target.closest('td');
+
+                    if (cell) {
+                        let printDiv;
+                        if (field === 'content') printDiv = cell.querySelector('.print-content-box');
+                        else if (field === 'customTitle') printDiv = cell.querySelector('.print-title-target');
+                        else if (field === 'originalTitle') printDiv = cell.querySelector('.print-keyword-target');
+
+                        if (printDiv) {
+                            printDiv.textContent = val || '-';
+                        }
+                    }
+                });
+
                 input.addEventListener('blur', (e) => {
                     const date = e.target.getAttribute('data-date');
                     const field = e.target.getAttribute('data-field');
@@ -979,6 +1291,16 @@
                     openDetailModal(date);
                 });
             });
+
+            // テーブル行からのクイックカメラボタン
+            document.querySelectorAll('.btn-quick-camera').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const date = e.currentTarget.getAttribute('data-date');
+                    openDetailModal(date);
+                    // カメラ入力トリガー
+                    document.getElementById('input-newspaper-image').click();
+                });
+            });
         }
 
         async function saveEntryField(dateStr, partialData) {
@@ -988,7 +1310,8 @@
                     status: false,
                     customTitle: '',
                     content: '',
-                    originalTitle: ''
+                    originalTitle: '',
+                    transcription: ''
                 };
             }
 
@@ -1024,7 +1347,8 @@
                 status: false,
                 customTitle: '',
                 content: '',
-                originalTitle: ''
+                originalTitle: '',
+                transcription: ''
             };
 
             const [y, m, d] = dateStr.split('-');
@@ -1034,6 +1358,22 @@
             document.getElementById('modal-custom-title').value = item.customTitle || '';
             document.getElementById('modal-content').value = item.content || '';
 
+            // AI文字起こし結果初期化
+            const transcribeArea = document.getElementById('transcription-result-box');
+            const transcribeInput = document.getElementById('modal-transcription');
+            if (item.transcription) {
+                transcribeInput.value = item.transcription;
+                transcribeArea.classList.remove('hidden');
+            } else {
+                transcribeInput.value = '';
+                transcribeArea.classList.add('hidden');
+            }
+
+            // 画像選択状態初期化
+            document.getElementById('ai-preview-container').classList.add('hidden');
+            document.getElementById('input-newspaper-image').value = '';
+            currentSelectedBase64Image = null;
+
             updateModalCharCount();
             document.getElementById('modal-detail').classList.remove('hidden');
         }
@@ -1041,6 +1381,7 @@
         function closeModal() {
             document.getElementById('modal-detail').classList.add('hidden');
             activeEditDate = null;
+            currentSelectedBase64Image = null;
         }
 
         function updateModalCharCount() {
@@ -1106,8 +1447,135 @@
             }
         }
 
+        // Gemini 2.5 Pro API呼び出し関数
+        async function callGemini25ProApi(base64Data, mimeType) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+                throw new Error("API_KEY_MISSING");
+            }
+
+            const promptText = `この画像は静岡新聞の紙面です。画像の中からコラム「大自在」の部分だけを探し出し、その本文のみを文字起こししてください。
+
+【厳格な抽出ルール】
+1. 「大自在」以外の周辺にある記事、見出し、写真、広告、日付などはすべて無視してください。
+2. 「大自在」は縦書きです。一番右の行から左の行へ、上から下へと正しく順番通りに読んでください。
+3. 文章中に出てくる「▶︎」や「▶」（黒い三角記号）は、文字として出力せず、「全角スペース（　）」に置き換えてください。
+4. 「文字起こし結果」などの挨拶や解説は出力せず、純粋な本文テキストのみを出力してください。`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+            const payload = {
+                contents: [
+                    {
+                        parts: [
+                            { text: promptText },
+                            {
+                                inline_data: {
+                                    mime_type: mimeType,
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorJson = await response.json().catch(() => ({}));
+                throw new Error(errorJson.error?.message || `API通信エラー (Status: ${response.status})`);
+            }
+
+            const resData = await response.json();
+            const candidate = resData.candidates && resData.candidates[0];
+            if (candidate && candidate.content && candidate.content.parts) {
+                return candidate.content.parts.map(p => p.text).join('').trim();
+            } else {
+                throw new Error("画像から文字起こし結果が得られませんでした。");
+            }
+        }
+
         // イベントリスナー初期化
         function initEvents() {
+            // 新聞写真トリガー・処理
+            const fileInput = document.getElementById('input-newspaper-image');
+            document.getElementById('btn-trigger-camera').addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                currentSelectedMimeType = file.type || 'image/jpeg';
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const result = evt.target.result;
+                    currentSelectedBase64Image = result.split(',')[1];
+
+                    // プレビュー表示
+                    document.getElementById('ai-image-preview').src = result;
+                    document.getElementById('ai-preview-container').classList.remove('hidden');
+                    document.getElementById('ai-status-msg').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i><span class="text-emerald-950 font-bold">画像がセットされました</span>';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // AI文字起こし実行ボタン
+            document.getElementById('btn-run-transcribe').addEventListener('click', async () => {
+                if (!currentSelectedBase64Image) {
+                    alert('写真を撮影するか、画像ファイルを選択してください。');
+                    return;
+                }
+
+                if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+                    alert('スクリプト（JavaScript）先頭の GEMINI_API_KEY にGoogle AI StudioのAPIキーを記述してください。');
+                    return;
+                }
+
+                const btn = document.getElementById('btn-run-transcribe');
+                const originalHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Gemini 2.5 Proが解析中...</span>';
+
+                try {
+                    const transcribedText = await callGemini25ProApi(currentSelectedBase64Image, currentSelectedMimeType);
+                    
+                    document.getElementById('modal-transcription').value = transcribedText;
+                    document.getElementById('transcription-result-box').classList.remove('hidden');
+                    document.getElementById('ai-status-msg').innerHTML = '<i class="fa-solid fa-sparkles text-amber-500"></i><span class="text-emerald-800 font-bold">文字起こし完了！</span>';
+                } catch (err) {
+                    if (err.message === 'API_KEY_MISSING') {
+                        alert('スクリプト（JavaScript）先頭の GEMINI_API_KEY にGoogle AI StudioのAPIキーを記述してください。');
+                    } else {
+                        alert(`解析エラー: ${err.message}`);
+                    }
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            });
+
+            // 文字起こし文を感想欄へ挿入
+            document.getElementById('btn-copy-transcription').addEventListener('click', () => {
+                const text = document.getElementById('modal-transcription').value;
+                if (!text) return;
+
+                const contentTextarea = document.getElementById('modal-content');
+                if (contentTextarea.value.trim() !== '') {
+                    contentTextarea.value += '\n\n【文字起こし】\n' + text;
+                } else {
+                    contentTextarea.value = text;
+                }
+                updateModalCharCount();
+            });
+
             // カスタム年月ポップアップ開閉
             const popover = document.getElementById('month-picker-popover');
             const toggleBtn = document.getElementById('btn-month-picker-toggle');
@@ -1214,7 +1682,8 @@
                     status: document.getElementById('modal-status').checked,
                     originalTitle: document.getElementById('modal-original-title').value.trim(),
                     customTitle: document.getElementById('modal-custom-title').value.trim(),
-                    content: document.getElementById('modal-content').value.trim()
+                    content: document.getElementById('modal-content').value.trim(),
+                    transcription: document.getElementById('modal-transcription').value.trim()
                 };
 
                 await saveEntryField(activeEditDate, updated);
@@ -1226,7 +1695,7 @@
             document.getElementById('btn-export-csv').addEventListener('click', () => {
                 const totalDays = getDaysInMonth(currentYear, currentMonth);
                 let csvContent = "\uFEFF";
-                csvContent += "日付,読了状態,自分で考えた題名,感想・要約,元記事キーワード\n";
+                csvContent += "日付,読了状態,自分で考えた題名,感想・要約,元記事キーワード,文字起こし本文\n";
 
                 for (let day = 1; day <= totalDays; day++) {
                     const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -1236,8 +1705,9 @@
                     const customTitle = `"${(item.customTitle || '').replace(/"/g, '""')}"`;
                     const content = `"${(item.content || '').replace(/"/g, '""')}"`;
                     const originalTitle = `"${(item.originalTitle || '').replace(/"/g, '""')}"`;
+                    const transcription = `"${(item.transcription || '').replace(/"/g, '""')}"`;
 
-                    csvContent += `${dateStr},${status},${customTitle},${content},${originalTitle}\n`;
+                    csvContent += `${dateStr},${status},${customTitle},${content},${originalTitle},${transcription}\n`;
                 }
 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1271,4 +1741,5 @@
         });
     </script>
 </body>
+
 </html>
